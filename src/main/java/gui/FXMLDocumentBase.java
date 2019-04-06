@@ -429,12 +429,25 @@ public class FXMLDocumentBase extends BorderPane {
     }
 
     //fares
-    private void updateResultSet() {
+    private void updateResultSet() throws SQLException {
+        if (newPerson) {
+            resultSet.updateInt("id", Integer.valueOf(idTextField.getText()));
+        }
+        resultSet.updateString("first_name", firstNameTextField.getText());
+        resultSet.updateString("middle_name", middleNameTextField.getText());
+        resultSet.updateString("last_name", lastNameTextField.getText());
+        resultSet.updateString("email", emailTextField.getText());
+        resultSet.updateString("phone", phoneTextField.getText());
     }
 
     //fares
     private void addNewPerson() {
-
+        idTextField.setText("");
+        firstNameTextField.setText("");
+        middleNameTextField.setText("");
+        lastNameTextField.setText("");
+        emailTextField.setText("");
+        phoneTextField.setText("");
     }
 
     //esraa
