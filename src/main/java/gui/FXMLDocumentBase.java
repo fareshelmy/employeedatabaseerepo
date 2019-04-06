@@ -1,4 +1,5 @@
 package gui;
+
 import datasource.DataSourceCreator;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -320,9 +321,10 @@ public class FXMLDocumentBase extends BorderPane {
         detailsGridPane.getChildren().add(lastNameTextField);
         detailsGridPane.getChildren().add(emailTextField);
         detailsGridPane.getChildren().add(phoneTextField);
-    
+
         //fares
-        
+        getStatement();
+
         //esraa
         newButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -425,13 +427,27 @@ public class FXMLDocumentBase extends BorderPane {
             }
         });
     }
+
     //fares
-    private void updateResultSet() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void updateResultSet() throws SQLException {
+        if (newPerson) {
+            resultSet.updateInt("id", Integer.valueOf(idTextField.getText()));
+        }
+        resultSet.updateString("first_name", firstNameTextField.getText());
+        resultSet.updateString("middle_name", middleNameTextField.getText());
+        resultSet.updateString("last_name", lastNameTextField.getText());
+        resultSet.updateString("email", emailTextField.getText());
+        resultSet.updateString("phone", phoneTextField.getText());
     }
+
     //fares
     private void addNewPerson() {
-
+        idTextField.setText("");
+        firstNameTextField.setText("");
+        middleNameTextField.setText("");
+        lastNameTextField.setText("");
+        emailTextField.setText("");
+        phoneTextField.setText("");
     }
     //esraa
     private void showNextPerson() {
@@ -450,6 +466,18 @@ public class FXMLDocumentBase extends BorderPane {
             Logger.getLogger(FXMLDocumentBase.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
+    private void getStatement() {
+        DataSource mySqlDataSource = DataSourceCreator.getMySqlDataSource();
+        try {
+            Connection connection = mySqlDataSource.getConnection();
+            Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE,
+                    ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            resultSet = statement.executeQuery("SELECT * FROM PERSON");
+            showNextPerson();
+        } catch (SQLException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
-    
