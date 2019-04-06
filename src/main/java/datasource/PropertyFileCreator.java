@@ -23,10 +23,10 @@ public class PropertyFileCreator {
         Properties properties = new Properties();
         FileOutputStream fileOutputStream = null;
         try {
-            fileOutputStream = new FileOutputStream("db.properties");
+            fileOutputStream = new FileOutputStream("probs.txt");
             properties.setProperty("MYSQL_DB_URL", "jdbc:mysql://localhost:3306/fares");
             properties.setProperty("MYSQL_DB_USERNAME", "root");
-            properties.setProperty("MYSQL_DB_PASSWORD", "1234");
+            properties.setProperty("MYSQL_DB_PASSWORD", "EsraaHamed112");
             properties.store(fileOutputStream, null);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(PropertyFileCreator.class.getName()).log(Level.SEVERE, null, ex);
