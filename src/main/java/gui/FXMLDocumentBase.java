@@ -326,6 +326,120 @@ public class FXMLDocumentBase extends BorderPane {
         getStatement();
 
         //esraa
+        newButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                addNewPerson();
+                newPerson = true;
+            }
+        });
+        updateButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (!idTextField.getText().equals("")
+                        && !firstNameTextField.getText().equals("")
+                        && !middleNameTextField.getText().equals("")
+                        && !lastNameTextField.getText().equals("")
+                        && !emailTextField.getText().equals("")
+                        && !phoneTextField.getText().equals("")) {
+                    try {
+                        if (newPerson) {
+                            resultSet.moveToInsertRow();
+                            updateResultSet();
+                            resultSet.insertRow();
+                            resultSet.next();
+                            newPerson = false;
+                        } else {
+                            updateResultSet();
+                            resultSet.updateRow();
+
+                        }
+                        emptyFlag = false;
+                    } catch (SQLException ex) {
+                        Logger.getLogger(FXMLDocumentBase.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+            }
+
+        });
+
+        deleteButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    if (!emptyFlag) {
+                        if (resultSet.isFirst() && resultSet.isLast()) {
+                            emptyFlag = true;
+                        }
+                        resultSet.deleteRow();
+                        addNewPerson();
+                        newPerson = true;
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(FXMLDocumentBase.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        firstButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    resultSet.beforeFirst();
+                    showNextPerson();
+                } catch (SQLException ex) {
+                    Logger.getLogger(FXMLDocumentBase.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        previousButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    resultSet.previous();
+                    resultSet.previous();
+                    showNextPerson();
+                } catch (SQLException ex) {
+                    Logger.getLogger(FXMLDocumentBase.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        nextButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                showNextPerson();
+            }
+        });
+
+        lastButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    resultSet.last();
+                    resultSet.previous();
+                    showNextPerson();
+                } catch (SQLException ex) {
+                    Logger.getLogger(FXMLDocumentBase.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+    }
+
+    //fares
+    private void updateResultSet() {
+    }
+
+    //fares
+    private void addNewPerson() {
+
+    }
+
+    //esraa
+    private void showNextPerson() {
+
     }
 
     private void getStatement() {
@@ -340,9 +454,5 @@ public class FXMLDocumentBase extends BorderPane {
         } catch (SQLException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    private void showNextPerson() {
-        
     }
 }
