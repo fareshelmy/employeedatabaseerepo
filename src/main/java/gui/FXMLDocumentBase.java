@@ -1,6 +1,14 @@
 package gui;
-
-
+import datasource.DataSourceCreator;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -8,12 +16,18 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.RowConstraints;
+import javax.sql.DataSource;
+import main.Main;
 
-public  class FXMLDocumentBase extends BorderPane {
+public class FXMLDocumentBase extends BorderPane {
 
-    protected final Label label;
-    protected final GridPane gridPane;
+    boolean newPerson = false;
+    private boolean emptyFlag = false;
+
+    protected final Label personDetailsLabel;
+    protected final GridPane buttonsGridPane;
     protected final ColumnConstraints columnConstraints;
     protected final ColumnConstraints columnConstraints0;
     protected final ColumnConstraints columnConstraints1;
@@ -22,14 +36,14 @@ public  class FXMLDocumentBase extends BorderPane {
     protected final ColumnConstraints columnConstraints4;
     protected final ColumnConstraints columnConstraints5;
     protected final RowConstraints rowConstraints;
-    protected final Button button;
-    protected final Button button0;
-    protected final Button button1;
-    protected final Button button2;
-    protected final Button button3;
-    protected final Button button4;
-    protected final Button button5;
-    protected final GridPane gridPane0;
+    protected final Button newButton;
+    protected final Button updateButton;
+    protected final Button deleteButton;
+    protected final Button firstButton;
+    protected final Button previousButton;
+    protected final Button nextButton;
+    protected final Button lastButton;
+    protected final GridPane detailsGridPane;
     protected final ColumnConstraints columnConstraints6;
     protected final ColumnConstraints columnConstraints7;
     protected final RowConstraints rowConstraints0;
@@ -44,17 +58,18 @@ public  class FXMLDocumentBase extends BorderPane {
     protected final Label label3;
     protected final Label label4;
     protected final Label label5;
-    protected final TextField textField;
-    protected final TextField textField0;
-    protected final TextField textField1;
-    protected final TextField textField2;
-    protected final TextField textField3;
-    protected final TextField textField4;
+    protected final TextField idTextField;
+    protected final TextField firstNameTextField;
+    protected final TextField middleNameTextField;
+    protected final TextField lastNameTextField;
+    protected final TextField emailTextField;
+    protected final TextField phoneTextField;
+    private ResultSet resultSet;
 
     public FXMLDocumentBase() {
 
-        label = new Label();
-        gridPane = new GridPane();
+        personDetailsLabel = new Label();
+        buttonsGridPane = new GridPane();
         columnConstraints = new ColumnConstraints();
         columnConstraints0 = new ColumnConstraints();
         columnConstraints1 = new ColumnConstraints();
@@ -63,14 +78,14 @@ public  class FXMLDocumentBase extends BorderPane {
         columnConstraints4 = new ColumnConstraints();
         columnConstraints5 = new ColumnConstraints();
         rowConstraints = new RowConstraints();
-        button = new Button();
-        button0 = new Button();
-        button1 = new Button();
-        button2 = new Button();
-        button3 = new Button();
-        button4 = new Button();
-        button5 = new Button();
-        gridPane0 = new GridPane();
+        newButton = new Button();
+        updateButton = new Button();
+        deleteButton = new Button();
+        firstButton = new Button();
+        previousButton = new Button();
+        nextButton = new Button();
+        lastButton = new Button();
+        detailsGridPane = new GridPane();
         columnConstraints6 = new ColumnConstraints();
         columnConstraints7 = new ColumnConstraints();
         rowConstraints0 = new RowConstraints();
@@ -85,12 +100,12 @@ public  class FXMLDocumentBase extends BorderPane {
         label3 = new Label();
         label4 = new Label();
         label5 = new Label();
-        textField = new TextField();
-        textField0 = new TextField();
-        textField1 = new TextField();
-        textField2 = new TextField();
-        textField3 = new TextField();
-        textField4 = new TextField();
+        idTextField = new TextField();
+        firstNameTextField = new TextField();
+        middleNameTextField = new TextField();
+        lastNameTextField = new TextField();
+        emailTextField = new TextField();
+        phoneTextField = new TextField();
 
         setMaxHeight(USE_PREF_SIZE);
         setMaxWidth(USE_PREF_SIZE);
@@ -99,12 +114,12 @@ public  class FXMLDocumentBase extends BorderPane {
         setPrefHeight(400.0);
         setPrefWidth(700.0);
 
-        BorderPane.setAlignment(label, javafx.geometry.Pos.CENTER);
-        label.setText("Person Details");
-        setTop(label);
+        BorderPane.setAlignment(personDetailsLabel, javafx.geometry.Pos.CENTER);
+        personDetailsLabel.setText("Person Details");
+        setTop(personDetailsLabel);
 
-        BorderPane.setAlignment(gridPane, javafx.geometry.Pos.CENTER);
-        gridPane.setHgap(10.0);
+        BorderPane.setAlignment(buttonsGridPane, javafx.geometry.Pos.CENTER);
+        buttonsGridPane.setHgap(10.0);
 
         columnConstraints.setHgrow(javafx.scene.layout.Priority.SOMETIMES);
         columnConstraints.setMinWidth(10.0);
@@ -138,51 +153,51 @@ public  class FXMLDocumentBase extends BorderPane {
         rowConstraints.setPrefHeight(30.0);
         rowConstraints.setVgrow(javafx.scene.layout.Priority.SOMETIMES);
 
-        button.setMnemonicParsing(false);
-        button.setPrefHeight(31.0);
-        button.setPrefWidth(99.0);
-        button.setText("New...");
+        newButton.setMnemonicParsing(false);
+        newButton.setPrefHeight(31.0);
+        newButton.setPrefWidth(99.0);
+        newButton.setText("New...");
 
-        GridPane.setColumnIndex(button0, 1);
-        button0.setMnemonicParsing(false);
-        button0.setPrefHeight(31.0);
-        button0.setPrefWidth(97.0);
-        button0.setText("Update");
+        GridPane.setColumnIndex(updateButton, 1);
+        updateButton.setMnemonicParsing(false);
+        updateButton.setPrefHeight(31.0);
+        updateButton.setPrefWidth(97.0);
+        updateButton.setText("Update");
 
-        GridPane.setColumnIndex(button1, 2);
-        button1.setMnemonicParsing(false);
-        button1.setPrefHeight(31.0);
-        button1.setPrefWidth(96.0);
-        button1.setText("Delete");
+        GridPane.setColumnIndex(deleteButton, 2);
+        deleteButton.setMnemonicParsing(false);
+        deleteButton.setPrefHeight(31.0);
+        deleteButton.setPrefWidth(96.0);
+        deleteButton.setText("Delete");
 
-        GridPane.setColumnIndex(button2, 3);
-        button2.setMnemonicParsing(false);
-        button2.setPrefHeight(31.0);
-        button2.setPrefWidth(91.0);
-        button2.setText("First");
+        GridPane.setColumnIndex(firstButton, 3);
+        firstButton.setMnemonicParsing(false);
+        firstButton.setPrefHeight(31.0);
+        firstButton.setPrefWidth(91.0);
+        firstButton.setText("First");
 
-        GridPane.setColumnIndex(button3, 4);
-        button3.setMnemonicParsing(false);
-        button3.setPrefHeight(31.0);
-        button3.setPrefWidth(95.0);
-        button3.setText("Previous");
+        GridPane.setColumnIndex(previousButton, 4);
+        previousButton.setMnemonicParsing(false);
+        previousButton.setPrefHeight(31.0);
+        previousButton.setPrefWidth(95.0);
+        previousButton.setText("Previous");
 
-        GridPane.setColumnIndex(button4, 5);
-        button4.setAlignment(javafx.geometry.Pos.CENTER);
-        button4.setContentDisplay(javafx.scene.control.ContentDisplay.CENTER);
-        button4.setMnemonicParsing(false);
-        button4.setPrefHeight(31.0);
-        button4.setPrefWidth(114.0);
-        button4.setText("Next");
+        GridPane.setColumnIndex(nextButton, 5);
+        nextButton.setAlignment(javafx.geometry.Pos.CENTER);
+        nextButton.setContentDisplay(javafx.scene.control.ContentDisplay.CENTER);
+        nextButton.setMnemonicParsing(false);
+        nextButton.setPrefHeight(31.0);
+        nextButton.setPrefWidth(114.0);
+        nextButton.setText("Next");
 
-        GridPane.setColumnIndex(button5, 6);
-        button5.setMnemonicParsing(false);
-        button5.setPrefHeight(31.0);
-        button5.setPrefWidth(95.0);
-        button5.setText("Last");
-        setBottom(gridPane);
+        GridPane.setColumnIndex(lastButton, 6);
+        lastButton.setMnemonicParsing(false);
+        lastButton.setPrefHeight(31.0);
+        lastButton.setPrefWidth(95.0);
+        lastButton.setText("Last");
+        setBottom(buttonsGridPane);
 
-        BorderPane.setAlignment(gridPane0, javafx.geometry.Pos.CENTER);
+        BorderPane.setAlignment(detailsGridPane, javafx.geometry.Pos.CENTER);
 
         columnConstraints6.setHgrow(javafx.scene.layout.Priority.SOMETIMES);
         columnConstraints6.setMaxWidth(345.0);
@@ -235,76 +250,80 @@ public  class FXMLDocumentBase extends BorderPane {
         GridPane.setRowIndex(label5, 5);
         label5.setText("Phone");
 
-        GridPane.setColumnIndex(textField, 1);
-        textField.setMaxWidth(USE_PREF_SIZE);
-        textField.setPrefHeight(31.0);
-        textField.setPrefWidth(198.0);
+        GridPane.setColumnIndex(idTextField, 1);
+        idTextField.setMaxWidth(USE_PREF_SIZE);
+        idTextField.setPrefHeight(31.0);
+        idTextField.setPrefWidth(198.0);
 
-        GridPane.setColumnIndex(textField0, 1);
-        GridPane.setRowIndex(textField0, 1);
-        textField0.setMaxWidth(USE_PREF_SIZE);
-        textField0.setPrefHeight(31.0);
-        textField0.setPrefWidth(370.0);
+        GridPane.setColumnIndex(firstNameTextField, 1);
+        GridPane.setRowIndex(firstNameTextField, 1);
+        firstNameTextField.setMaxWidth(USE_PREF_SIZE);
+        firstNameTextField.setPrefHeight(31.0);
+        firstNameTextField.setPrefWidth(370.0);
 
-        GridPane.setColumnIndex(textField1, 1);
-        GridPane.setRowIndex(textField1, 2);
-        textField1.setMaxWidth(USE_PREF_SIZE);
-        textField1.setPrefHeight(31.0);
-        textField1.setPrefWidth(371.0);
+        GridPane.setColumnIndex(middleNameTextField, 1);
+        GridPane.setRowIndex(middleNameTextField, 2);
+        middleNameTextField.setMaxWidth(USE_PREF_SIZE);
+        middleNameTextField.setPrefHeight(31.0);
+        middleNameTextField.setPrefWidth(371.0);
 
-        GridPane.setColumnIndex(textField2, 1);
-        GridPane.setRowIndex(textField2, 3);
-        textField2.setMaxWidth(USE_PREF_SIZE);
-        textField2.setPrefHeight(31.0);
-        textField2.setPrefWidth(370.0);
+        GridPane.setColumnIndex(lastNameTextField, 1);
+        GridPane.setRowIndex(lastNameTextField, 3);
+        lastNameTextField.setMaxWidth(USE_PREF_SIZE);
+        lastNameTextField.setPrefHeight(31.0);
+        lastNameTextField.setPrefWidth(370.0);
 
-        GridPane.setColumnIndex(textField3, 1);
-        GridPane.setRowIndex(textField3, 4);
-        textField3.setMaxWidth(USE_PREF_SIZE);
-        textField3.setPrefHeight(31.0);
-        textField3.setPrefWidth(370.0);
+        GridPane.setColumnIndex(emailTextField, 1);
+        GridPane.setRowIndex(emailTextField, 4);
+        emailTextField.setMaxWidth(USE_PREF_SIZE);
+        emailTextField.setPrefHeight(31.0);
+        emailTextField.setPrefWidth(370.0);
 
-        GridPane.setColumnIndex(textField4, 1);
-        GridPane.setRowIndex(textField4, 5);
-        textField4.setMaxWidth(USE_PREF_SIZE);
-        setLeft(gridPane0);
+        GridPane.setColumnIndex(phoneTextField, 1);
+        GridPane.setRowIndex(phoneTextField, 5);
+        phoneTextField.setMaxWidth(USE_PREF_SIZE);
+        setLeft(detailsGridPane);
         setPadding(new Insets(20.0));
 
-        gridPane.getColumnConstraints().add(columnConstraints);
-        gridPane.getColumnConstraints().add(columnConstraints0);
-        gridPane.getColumnConstraints().add(columnConstraints1);
-        gridPane.getColumnConstraints().add(columnConstraints2);
-        gridPane.getColumnConstraints().add(columnConstraints3);
-        gridPane.getColumnConstraints().add(columnConstraints4);
-        gridPane.getColumnConstraints().add(columnConstraints5);
-        gridPane.getRowConstraints().add(rowConstraints);
-        gridPane.getChildren().add(button);
-        gridPane.getChildren().add(button0);
-        gridPane.getChildren().add(button1);
-        gridPane.getChildren().add(button2);
-        gridPane.getChildren().add(button3);
-        gridPane.getChildren().add(button4);
-        gridPane.getChildren().add(button5);
-        gridPane0.getColumnConstraints().add(columnConstraints6);
-        gridPane0.getColumnConstraints().add(columnConstraints7);
-        gridPane0.getRowConstraints().add(rowConstraints0);
-        gridPane0.getRowConstraints().add(rowConstraints1);
-        gridPane0.getRowConstraints().add(rowConstraints2);
-        gridPane0.getRowConstraints().add(rowConstraints3);
-        gridPane0.getRowConstraints().add(rowConstraints4);
-        gridPane0.getRowConstraints().add(rowConstraints5);
-        gridPane0.getChildren().add(label0);
-        gridPane0.getChildren().add(label1);
-        gridPane0.getChildren().add(label2);
-        gridPane0.getChildren().add(label3);
-        gridPane0.getChildren().add(label4);
-        gridPane0.getChildren().add(label5);
-        gridPane0.getChildren().add(textField);
-        gridPane0.getChildren().add(textField0);
-        gridPane0.getChildren().add(textField1);
-        gridPane0.getChildren().add(textField2);
-        gridPane0.getChildren().add(textField3);
-        gridPane0.getChildren().add(textField4);
-
+        buttonsGridPane.getColumnConstraints().add(columnConstraints);
+        buttonsGridPane.getColumnConstraints().add(columnConstraints0);
+        buttonsGridPane.getColumnConstraints().add(columnConstraints1);
+        buttonsGridPane.getColumnConstraints().add(columnConstraints2);
+        buttonsGridPane.getColumnConstraints().add(columnConstraints3);
+        buttonsGridPane.getColumnConstraints().add(columnConstraints4);
+        buttonsGridPane.getColumnConstraints().add(columnConstraints5);
+        buttonsGridPane.getRowConstraints().add(rowConstraints);
+        buttonsGridPane.getChildren().add(newButton);
+        buttonsGridPane.getChildren().add(updateButton);
+        buttonsGridPane.getChildren().add(deleteButton);
+        buttonsGridPane.getChildren().add(firstButton);
+        buttonsGridPane.getChildren().add(previousButton);
+        buttonsGridPane.getChildren().add(nextButton);
+        buttonsGridPane.getChildren().add(lastButton);
+        detailsGridPane.getColumnConstraints().add(columnConstraints6);
+        detailsGridPane.getColumnConstraints().add(columnConstraints7);
+        detailsGridPane.getRowConstraints().add(rowConstraints0);
+        detailsGridPane.getRowConstraints().add(rowConstraints1);
+        detailsGridPane.getRowConstraints().add(rowConstraints2);
+        detailsGridPane.getRowConstraints().add(rowConstraints3);
+        detailsGridPane.getRowConstraints().add(rowConstraints4);
+        detailsGridPane.getRowConstraints().add(rowConstraints5);
+        detailsGridPane.getChildren().add(label0);
+        detailsGridPane.getChildren().add(label1);
+        detailsGridPane.getChildren().add(label2);
+        detailsGridPane.getChildren().add(label3);
+        detailsGridPane.getChildren().add(label4);
+        detailsGridPane.getChildren().add(label5);
+        detailsGridPane.getChildren().add(idTextField);
+        detailsGridPane.getChildren().add(firstNameTextField);
+        detailsGridPane.getChildren().add(middleNameTextField);
+        detailsGridPane.getChildren().add(lastNameTextField);
+        detailsGridPane.getChildren().add(emailTextField);
+        detailsGridPane.getChildren().add(phoneTextField);
+    
+        //fares
+        
+        //esraa
+        
     }
 }
