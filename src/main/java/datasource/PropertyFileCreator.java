@@ -9,6 +9,6 @@ package datasource;
  *
  * @author FARES-LAP
  */
-public class DataSourceCreator {
+public class PropertyFileCreator {
     //fares
 }
